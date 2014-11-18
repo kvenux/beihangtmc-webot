@@ -1,9 +1,38 @@
 ---
 # 直接回复
-hi|你好|nihao: 'hi, I am robot'
+你好|nihao: 'Hi, I am 小北北'
+
+deron|Deron: '小草莓我们都想要~'
+sophie|Sophie: '国际植物保护组织重点关注对象~强迫症权益保障协会重点关注对象'
+keven|Keven: '已经躺平~没人黑我的是吧小北北，等等，给你冲锋枪是让你打别人的'
+peter|Peter: '皮主席我想对你说，吸烟有害腰子~'
+dale|Dale: '张弛我爱你~~~     ---来自 捡肥皂 客户端'
+elena|Elena: '小鸽子参加放鸽子比赛居然一次没输过⊙▂⊙'
+junyar|Junyar: '品牌毛线，贵阳出品，质量优异，你值得拥有~'
+veronica|Veronica: '东北女(nia)银(men)，霸气侧漏~'
+doris|Doris: '求男友\(￣︶￣)> <(￣︶￣)/ ~'
+grace|Grace: '上次我跟女盆友出去玩，回来后相机里多了很多你男友的照片，一时不知该说啥~'
+cindy|Cindy: '我们敬爱的Cindy老师~'
+isabelle|Isabelle: '伊莎贝尔萌妹子，快做CC1吧~~~'
+jack|Jack: '你儿子是你的么~  ---记某次难忘的Table Topic'
+jane|Jane: '护士大姐大~'
+jason|Jason: '我有一哥们 去卫生间的时候都带着笔记本~'
+jill|Jill: '泪流满面是我毕生的追求~T_T'
+leo|Leo: '小狮子你好久不来了呢~'
+lucia|Lucia: '女王大人你咋啥都知道~ ￣▽￣ ╮'
+megan|Megan: 'hot girl!没帅哥你就不来看我了么~╮(╯▽╰)╭'
+monk|Monk: '小芒果么么哒 没话说时总黑他~你们这些人不要黑monk了，他不就姿势不对么'
+nora|Nora: 'Nora大美女我们呼唤你~=^_^='
+sarah|Sarah: 'Sarah大美女，工作累了就想想演讲，心情瞬间就更累了呢~'
+stan|Stan: '怎么会比我还可爱呢~ㄟ(▔,▔)ㄏ '
+wesley|Wesley: '开山鼻祖维大大~'
+william|William: '好好吃的油焖大虾ㄟ(▔▽▔)ㄏ ~'
+jocelyn|Jocelyn: '这个吃货真是没出息啊'
+
+亲: '亲~~'
 
 # 随机回复一个
-hello: 
+hello:
   - 你好
   - fine
   - how are you
@@ -17,7 +46,7 @@ test:
 帮助: |
   帮助这个事情，
   说起来也不容易，
-  我也不知道怎么跟你解释，
+  也不知道怎么跟你解释，
   发送 help 试试看呢
 
 

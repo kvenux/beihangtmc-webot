@@ -1,5 +1,5 @@
 {
-  "name": "weixin-robot-example",
+  "name": "beihangtmc-webot",
   "version": "0.0.5",
   "main": "app.js",
   "dependencies": {
@@ -28,12 +28,8 @@
     "webot",
     "wechat"
   ],
-  "description": "weixin-robot 模块示例",
+  "description": "Beihang Toastmaster webot",
   "repository": "https://github.com/node-webot/webot-example.git",
-  "author": "Jesse Yang <jyyjcc@gmail.com>",
-  "contributors": [
-    "Jesse Yang <jyyjcc@gmail.com> (http://github.com/ktmud)",
-    "TZ <atian25@qq.com> (http://atian25.iteye.com/)"
-  ],
+  "author": "Keven Sun <buaasjw@gmail.com>",
   "license": "MIT"
 }

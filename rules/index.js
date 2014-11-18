@@ -26,18 +26,15 @@ module.exports = exports = function(webot){
     },
     handler: function(info){
       var reply = {
-        title: '感谢你收听webot机器人',
-        pic: 'https://raw.github.com/node-webot/webot-example/master/qrcode.jpg',
-        url: 'https://github.com/node-webot/webot-example',
+        title: '欢迎来到北航Toastmasters',
+        pic: 'http://kvenux.qiniudn.com/tags.png',
+        url: 'http://beihangtm.sinaapp.com/',
         description: [
           '你可以试试以下指令:',
             'game : 玩玩猜数字的游戏吧',
-            's+空格+关键词 : 我会帮你百度搜索喔',
-            's+空格+nde : 可以试试我的纠错能力',
-            '使用「位置」发送你的经纬度',
             '重看本指令请回复help或问号',
             '更多指令请回复more',
-            'PS: 点击下面的「查看全文」将跳转到我的github页'
+            '点击「查看全文」将跳转到我们的博客哟'
         ].join('\n')
       };
       // 返回值如果是list，则回复图文消息列表
@@ -58,12 +55,67 @@ module.exports = exports = function(webot){
       '没有更多啦！当前可用指令：\n' + reply];
   });
 
+  webot.set('career', {
+    description: '回复career YourName，查看你担任过的角色和完成的演讲',
+    // pattern 既可以是函数，也可以是 regexp 或 字符串(模糊匹配)
+    pattern: /^(career )\s*(.*)$/i,
+    // 回复handler也可以直接是字符串或数组，如果是数组则随机返回一个子元素
+    /*handler: 'career,{2}'*/
+    handler: function(info){
+      console.log(info.param[2])
+      var rf=require("fs");
+      var data=rf.readFileSync("roletaken.csv","utf-8");
+      console.log(data);
+      var line=data.split("\n");
+      console.log(line[2]);
+      var oneline = line[1]
+      var words = oneline.split(",")
+      /*var rdlist = csv().from(data).to(console.log);*/
+      var result = "你好,"+ info.param[2];
+      var flag=0
+      /*var name=info.param[2].toLowerCase()*/
+      var name=info.param[2]
+      for (var i=0;i<line.length;i++){
+        /*console.log(line[i]);*/
+        oneline = line[i]
+        words = oneline.split(",")
+        var newname = words[1]
+        /*console.log(newname+name);*/
+        /*console.log(name);*/
+        if(newname==name){
+          flag=1
+          console.log(words[1]);
+          result= newname+'于'+words[2]+'加入BeihangToastmasters\n'
+          result+= '截止目前你总共完成：\n'
+          result+= words[3]+'次 Toastmaster,\n'
+          result+= words[4]+'次 TableTopicMaster,\n'
+          result+= words[6]+'次 Timer,\n'
+          result+= words[7]+'次 Ah-Counter,\n'
+          result+= words[8]+'次 Grammarian,\n'
+          result+= words[9]+'次 GeneralEvaluator,\n'
+          result+= words[10]+'次 TableTopicEvaluator,\n'
+          result+= words[11]+'次 PreparedSpeechEvaluator,\n'
+          result+= '已经完成'+words[5]+',\n'
+          result+= '一共承担角色'+words[14]+'次\n'
+          result+= '感谢你对BeihangTMC做出的贡献，一路上因为有你，所以精彩！'
+        }
+
+        /*for(var j=0;j<)*/
+      }
+      if(flag==1){
+        return result
+      }
+
+      return 'not member,' + info.param[2]
+    }
+  });
+
   webot.set('who_are_you', {
     description: '想知道我是谁吗? 发送: who?',
     // pattern 既可以是函数，也可以是 regexp 或 字符串(模糊匹配)
     pattern: /who|你是[谁\?]+/i,
     // 回复handler也可以直接是字符串或数组，如果是数组则随机返回一个子元素
-    handler: ['我是神马机器人', '微信机器人']
+    handler: ['我是北航头马的机器人，叫人家小北北┑(￣▽ ￣)┍', '小玫瑰2号']
   });
 
   // 正则匹配后的匹配组存在 info.query 中
@@ -227,6 +279,7 @@ module.exports = exports = function(webot){
     delete info.session.last_search_word;
   });
   // 调用已有的action
+  /*
   webot.set('suggest keyword', {
     description: '发送: s nde ,然后再回复Y或其他',
     pattern: /^(?:搜索?|search|s\b)\s*(.+)/i,
@@ -239,7 +292,7 @@ module.exports = exports = function(webot){
       }
     }
   });
-
+*/
   function do_search(info, next){
     // pattern的解析结果将放在param里
     var q = info.param[1];
@@ -247,7 +300,7 @@ module.exports = exports = function(webot){
     // 从某个地方搜索到数据...
     return search(q , next);
   }
-
+/*
   // 可以通过回调返回结果
   webot.set('search', {
     description: '发送: s 关键词 ',
@@ -255,8 +308,8 @@ module.exports = exports = function(webot){
     //handler也可以是异步的
     handler: do_search
   });
-
-
+*/
+/*
   webot.waitRule('wait_timeout', function(info) {
     if (new Date().getTime() - info.session.wait_begin > 5000) {
       delete info.session.wait_begin;
@@ -276,7 +329,7 @@ module.exports = exports = function(webot){
       return '请等待5秒后回复';
     }
   });
-
+*/
   /**
    * Wait rules as lists
    *
@@ -316,6 +369,7 @@ module.exports = exports = function(webot){
 
   //支持location消息 此examples使用的是高德地图的API
   //http://restapi.amap.com/rgeocode/simple?resType=json&encode=utf-8&range=3000&roadnum=0&crossnum=0&poinum=0&retvalue=1&sid=7001&region=113.24%2C23.08
+  /*
   webot.set('check_location', {
     description: '发送你的经纬度,我会查询你的位置',
     pattern: function(info){
@@ -328,8 +382,9 @@ module.exports = exports = function(webot){
       });
     }
   });
-
+*/
   //图片
+  /*
   webot.set('check_image', {
     description: '发送图片,我将返回其hash值',
     pattern: function(info){
@@ -354,16 +409,30 @@ module.exports = exports = function(webot){
       }
     }
   });
-
+*/
   // 回复图文消息
   webot.set('reply_news', {
-    description: '发送news,我将回复图文消息你',
-    pattern: /^news\s*(\d*)$/,
+    description: '发送letter,查看最近的welcome letter',
+    pattern: /^letter\s*(\d*)$/,
     handler: function(info){
       var reply = [
-        {title: '微信机器人', description: '微信机器人测试帐号：webot', pic: 'https://raw.github.com/node-webot/webot-example/master/qrcode.jpg', url: 'https://github.com/node-webot/webot-example'},
-        {title: '豆瓣同城微信帐号', description: '豆瓣同城微信帐号二维码：douban-event', pic: 'http://i.imgur.com/ijE19.jpg', url: 'https://github.com/node-webot/weixin-robot'},
-        {title: '图文消息3', description: '图文消息描述3', pic: 'https://raw.github.com/node-webot/webot-example/master/qrcode.jpg', url: 'http://www.baidu.com'}
+        {title: 'Autumn @BeihangTMC 78th Meeting on Fri Nov 14th', description: '', pic: 'http://kvenux.qiniudn.com/78th.jpg', url: 'http://mp.weixin.qq.com/s?__biz=MzA3NDM0NzUyOQ==&mid=201133110&idx=1&sn=200eb3061f3fc8c00be41a6a3b0ee1cc#rd'},
+        {title: 'Movies @BeihangTMC 77th Meeting on Fri Nov 7th', description: '', pic: 'http://kvenux.qiniudn.com/77th.jpg', url: 'http://mp.weixin.qq.com/s?__biz=MzA3NDM0NzUyOQ==&mid=201027836&idx=1&sn=9134e2b3f9feab4e36ff28b3d2540d8f#rd'},
+        {title: 'Halloween @BeihangTMC 76th Meeting on Fri Oct 31th', description: '', pic: 'http://kvenux.qiniudn.com/76th.jpg', url: 'http://mp.weixin.qq.com/s?__biz=MzA3NDM0NzUyOQ==&mid=200926020&idx=1&sn=f160463064b2441bd275206124522f6e#rd'}
+      ];
+      // 发送 "news 1" 时只回复一条图文消息
+      return Number(info.param[1]) == 1 ? reply[0] : reply;
+    }
+  });
+
+  webot.set('reply_news', {
+    description: '发送minutes,查看最近的meeting minutes',
+    pattern: /^minutes\s*(\d*)$/,
+    handler: function(info){
+      var reply = [
+        {title: 'Autumn @BeihangTMC 78th Meeting Minutes', description: '', pic: 'http://kvenux.qiniudn.com/78th.jpg', url: 'http://mp.weixin.qq.com/s?__biz=MzA3NDM0NzUyOQ==&mid=201154544&idx=1&sn=984d0b91bcc9c877f359f1e6a8168eba#rd'},
+        {title: 'Movies @BeihangTMC 77th Meeting Minutes', description: '', pic: 'http://kvenux.qiniudn.com/77th.jpg', url: 'http://mp.weixin.qq.com/s?__biz=MzA3NDM0NzUyOQ==&mid=201043963&idx=1&sn=2dc09d969cfd05d2f304c4d2035d2776#rd'},
+        {title: 'Halloween @BeihangTMC 76th Meeting Minutes', description: '', pic: 'http://kvenux.qiniudn.com/76th.jpg', url: 'http://mp.weixin.qq.com/s?__biz=MzA3NDM0NzUyOQ==&mid=200974952&idx=1&sn=4f7e4fa1b5977ac3b290076c03a05af1#rd'}
       ];
       // 发送 "news 1" 时只回复一条图文消息
       return Number(info.param[1]) == 1 ? reply[0] : reply;
@@ -382,6 +451,6 @@ module.exports = exports = function(webot){
     // 你也可以将这些 message 存入数据库
     log('unhandled message: %s', info.text);
     info.flag = true;
-    return '你发送了「' + info.text + '」,可惜我太笨了,听不懂. 发送: help 查看可用的指令';
+    return '「' + info.text + '」?人家不懂诶。。。说点我能听懂的呢。要不还是给我发 help吧';
   });
 };

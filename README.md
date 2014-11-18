@@ -1,4 +1,5 @@
-# [微信公共帐号机器人](https://github.com/node-webot/weixin-robot)示例 [![Build Status](https://api.travis-ci.org/node-webot/webot-example.png?branch=master)](https://travis-ci.org/node-webot/webot-example)
+# BeihangTMC 微信公众号机器人
+fork自https://github.com/node-webot/weixin-robot
 
 ## 本地运行
 
@@ -10,8 +11,6 @@ make start
 ```
 
 其中，`make start` 命令会调用 `node app.js` 。
-建议你 fork 一份自己的版本，这样你就可以任意做出更改和调试了。
-
 
 ## 消息调试
 
@@ -35,15 +34,9 @@ webot send location   # 调试地理位置
 webot send event      # 调试事件消息
 ```
 
-`webot-cli` 默认访问的接口地址是 http://127.0.0.1:3000 ，要调试本示例的程序，
-你需要指定 `webot send --des http://127.0.0.1:3000/wechat'
-
-
-## 在微信上试用此示例
-
-- 微信账号：webot-test
-
-![qrcode: webot-test](https://raw.github.com/node-webot/webot-example/master/qrcode.jpg)
+webot-cli 默认访问的接口地址是 http://127.0.0.1:3000 ，要调试本示例的程序，
+你需要指定 webot send --des http://127.0.0.1/wechat --port 80
+本例端口使用的是80
 
 # 搭建你自己的机器人
 
@@ -55,10 +48,5 @@ webot send event      # 调试事件消息
 
 仓库中的 `Procfile` 为 [heroku](http://www.heroku.com/) 的配置文件。
 `manifest.yml` 为 [cloudfoundry](http://www.cloudfoundry.com/) 的示例配置文件。
-
-# Credit
-
-[weixin-robot](https://github.com/node-webot/weixin-robot) 的[初始版本](https://github.com/node-webot/weixin-robot/tree/0.0.x)由[@ktmud](https://github.com/ktmud)实现，
-[@atian](https://github.com/atian25)重构并扩展为 0.2 版本。目前的测试用例也大部分由他完成。
 
 [weixin-robot] 使用了 [@JacksonTian](https://github.com/JacksonTian) 的 [wechat](https://github.com/node-webot/wechat) 组件。

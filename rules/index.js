@@ -1,4 +1,5 @@
 var crypto = require('crypto');
+var rf=require("fs");
 
 var debug = require('debug');
 var log = debug('webot-example:log');
@@ -31,10 +32,9 @@ module.exports = exports = function(webot){
         url: 'http://beihangtm.sinaapp.com/',
         description: [
           '你可以试试以下指令:',
-            'game : 玩玩猜数字的游戏吧',
-            '重看本指令请回复help或问号',
-            '更多指令请回复more',
-            '点击「查看全文」将跳转到我们的博客哟'
+          '重看本指令请回复help或问号',
+          '更多指令请回复more',
+          '点击「查看全文」将跳转到我们的博客哟'
         ].join('\n')
       };
       // 返回值如果是list，则回复图文消息列表
@@ -56,15 +56,15 @@ module.exports = exports = function(webot){
   });
 
   webot.set('career', {
-    description: '回复career YourName，查看你担任过的角色和完成的演讲',
+    description: '回复career Name，查看你担任过的角色和完成的演讲',
     // pattern 既可以是函数，也可以是 regexp 或 字符串(模糊匹配)
     pattern: /^(career )\s*(.*)$/i,
     // 回复handler也可以直接是字符串或数组，如果是数组则随机返回一个子元素
     /*handler: 'career,{2}'*/
     handler: function(info){
       console.log(info.param[2])
-      var rf=require("fs");
-      var data=rf.readFileSync("roletaken.csv","utf-8");
+      /*var rf=require("fs");*/
+      var data=rf.readFileSync("roletaken_new.csv","utf-8");
       console.log(data);
       var line=data.split("\n");
       console.log(line[2]);
@@ -110,6 +110,49 @@ module.exports = exports = function(webot){
     }
   });
 
+  webot.set('rolehis', {
+    description: '回复rolehis Name，查看你担任过的角色和完成的演讲',
+    // pattern 既可以是函数，也可以是 regexp 或 字符串(模糊匹配)
+    pattern: /^(rolehis )\s*(.*)$/i,
+    // 回复handler也可以直接是字符串或数组，如果是数组则随机返回一个子元素
+    /*handler: 'career,{2}'*/
+    handler: function(info){
+      console.log(info.param[2])
+      /*var rf=require("fs");*/
+      var data=rf.readFileSync("rolehis.csv","utf-8");
+      var line=data.split("\n");
+      var oneline = line[0]
+      var names = oneline.split(",")
+      /*var rdlist = csv().from(data).to(console.log);*/
+      var flag=0
+      /*var name=info.param[2].toLowerCase()*/
+      var name=info.param[2]
+      name=name.toLowerCase()
+      result='Hi, '+name+' 你担任过的角色有：\n'
+      for (var i=2;i<names.length;i++){
+        /*console.log(names[i])*/
+        /*console.log(name)*/
+        /*console.log(names[i]==name)*/
+
+        if(names[i].toLowerCase()==name){
+          flag=1
+          for(j=2;j<line.length-1;j++){
+            words=line[j].split(',')
+            if(words[i]!=''){
+              result+=words[0]+' '+words[1]+' '+words[i]+'\n'
+            }
+          }
+          break;
+        }
+      }
+      if(flag==1){
+        return result
+      }
+
+      return 'You are not member, ' + info.param[2]
+    }
+  });
+
   webot.set('who_are_you', {
     description: '想知道我是谁吗? 发送: who?',
     // pattern 既可以是函数，也可以是 regexp 或 字符串(模糊匹配)
@@ -118,238 +161,494 @@ module.exports = exports = function(webot){
     handler: ['我是北航头马的机器人，叫人家小北北┑(￣▽ ￣)┍', '小玫瑰2号']
   });
 
-  // 正则匹配后的匹配组存在 info.query 中
-  webot.set('your_name', {
-    description: '自我介绍下吧, 发送: I am [enter_your_name]',
-    pattern: /^(?:my name is|i am|我(?:的名字)?(?:是|叫)?)\s*(.*)$/i,
 
-    // handler: function(info, action){
-    //   return '你好,' + info.param[1]
-    // }
-    // 或者更简单一点
-    handler: '你好,{1}'
-  });
-
-  // 简单的纯文本对话，可以用单独的 yaml 文件来定义
-  require('js-yaml');
-  webot.dialog(__dirname + '/dialog.yaml');
-
-  // 支持一次性加多个（方便后台数据库存储规则）
-  webot.set([{
-    name: 'morning',
-    description: '打个招呼吧, 发送: good morning',
-    pattern: /^(早上?好?|(good )?moring)[啊\!！\.。]*$/i,
-    handler: function(info){
-      var d = new Date();
-      var h = d.getHours();
-      if (h < 3) return '[嘘] 我这边还是深夜呢，别吵着大家了';
-      if (h < 5) return '这才几点钟啊，您就醒了？';
-      if (h < 7) return '早啊官人！您可起得真早呐~ 给你请安了！\n 今天想参加点什么活动呢？';
-      if (h < 9) return 'Morning, sir! 新的一天又开始了！您今天心情怎么样？';
-      if (h < 12) return '这都几点了，还早啊...';
-      if (h < 14) return '人家中午饭都吃过了，还早呐？';
-      if (h < 17) return '如此美好的下午，是很适合出门逛逛的';
-      if (h < 21) return '早，什么早？找碴的找？';
-      if (h >= 21) return '您还是早点睡吧...';
-    }
-  }, {
-    name: 'time',
-    description: '想知道几点吗? 发送: time',
-    pattern: /^(几点了|time)\??$/i,
-    handler: function(info) {
-      var d = new Date();
-      var h = d.getHours();
-      var t = '现在是服务器时间' + h + '点' + d.getMinutes() + '分';
-      if (h < 4 || h > 22) return t + '，夜深了，早点睡吧 [月亮]';
-      if (h < 6) return t + '，您还是再多睡会儿吧';
-      if (h < 9) return t + '，又是一个美好的清晨呢，今天准备去哪里玩呢？';
-      if (h < 12) return t + '，一日之计在于晨，今天要做的事情安排好了吗？';
-      if (h < 15) return t + '，午后的冬日是否特别动人？';
-      if (h < 19) return t + '，又是一个充满活力的下午！今天你的任务完成了吗？';
-      if (h <= 22) return t + '，这样一个美好的夜晚，有没有去看什么演出？';
-      return t;
-    }
-  }]);
-
-  // 等待下一次回复
-  webot.set('guess my sex', {
-    pattern: /是男.还是女.|你.*男的女的/,
-    handler: '你猜猜看呐',
-    replies: {
-      '/女|girl/i': '人家才不是女人呢',
-      '/男|boy/i': '是的，我就是翩翩公子一枚',
-      'both|不男不女': '你丫才不男不女呢',
-      '不猜': '好的，再见',
-      // 请谨慎使用通配符
-      '/.*/': function reguess(info) {
-        if (info.rewaitCount < 2) {
-          info.rewait();
-          return '你到底还猜不猜嘛！';
-        }
-        return '看来你真的不想猜啊';
-      },
-    }
-
-    // 也可以用一个函数搞定:
-    // replies: function(info){
-    //   return 'haha, I wont tell you'
-    // }
-
-    // 也可以是数组格式，每个元素为一条rule
-    // replies: [{
-    //   pattern: '/^g(irl)?\\??$/i',
-    //   handler: '猜错'
-    // },{
-    //   pattern: '/^b(oy)?\\??$/i',
-    //   handler: '猜对了'
-    // },{
-    //   pattern: 'both',
-    //   handler: '对你无语...'
-    // }]
-  });
-
-  // 定义一个 wait rule
-  webot.waitRule('wait_guess', function(info) {
-    var r = Number(info.text);
-
-    // 用户不想玩了...
-    if (isNaN(r)) {
-      info.resolve();
-      return null;
-    }
-
-    var num = info.session.guess_answer;
-
-    if (r === num) {
-      return '你真聪明!';
-    }
-
-    var rewaitCount = info.session.rewait_count || 0;
-    if (rewaitCount >= 2) {
-      return '怎么这样都猜不出来！答案是 ' + num + ' 啊！';
-    }
-
-    //重试
-    info.rewait();
-    return (r > num ? '大了': '小了') +',还有' + (2 - rewaitCount) + '次机会,再猜.';
-  });
-
-  webot.set('guess number', {
-    description: '发送: game , 玩玩猜数字的游戏吧',
-    pattern: /(?:game|玩?游戏)\s*(\d*)/,
-    handler: function(info){
-      //等待下一次回复
-      var num = Number(info.param[1]) || _.random(1,9);
-
-      verbose('answer is: ' + num);
-
-      info.session.guess_answer = num;
-
-      info.wait('wait_guess');
-      return '玩玩猜数字的游戏吧, 1~9,选一个';
-    }
-  });
-
-  webot.waitRule('wait_suggest_keyword', function(info, next){
-    if (!info.text) {
-      return next();
-    }
-
-    // 按照定义规则的 name 获取其他 handler
-    var rule_search = webot.get('search');
-
-    // 用户回复回来的消息
-    if (info.text.match(/^(好|要|y)$/i)) {
-      // 修改回复消息的匹配文本，传入搜索命令执行
-      info.param[0] = 's nodejs';
-      info.param[1] = 'nodejs';
-
-      // 执行某条规则
-      webot.exec(info, rule_search, next);
-      // 也可以调用 rule 的 exec 方法
-      // rule_search.exec(info, next);
-    } else {
-      info.param[1] = info.session.last_search_word;
-      // 或者直接调用 handler :
-      rule_search.handler(info, next);
-      // 甚至直接用命名好的 function name 来调用：
-      // do_search(info, next);
-    }
-    // remember to clean your session object.
-    delete info.session.last_search_word;
-  });
-  // 调用已有的action
   /*
-  webot.set('suggest keyword', {
-    description: '发送: s nde ,然后再回复Y或其他',
-    pattern: /^(?:搜索?|search|s\b)\s*(.+)/i,
-    handler: function(info){
-      var q = info.param[1];
-      if (q === 'nde') {
-        info.session.last_search_word = q;
-        info.wait('wait_suggest_keyword');
-        return '你输入了:' + q + '，似乎拼写错误。要我帮你更改为「nodejs」并搜索吗?';
-      }
-    }
-  });
-*/
-  function do_search(info, next){
-    // pattern的解析结果将放在param里
-    var q = info.param[1];
-    log('searching: ', q);
-    // 从某个地方搜索到数据...
-    return search(q , next);
-  }
-/*
   // 可以通过回调返回结果
   webot.set('search', {
-    description: '发送: s 关键词 ',
-    pattern: /^(?:搜索?|search|百度|s\b)\s*(.+)/i,
-    //handler也可以是异步的
-    handler: do_search
-  });
+description: '发送: s 关键词 ',
+pattern: /^(?:搜索?|search|百度|s\b)\s*(.+)/i,
+//handler也可以是异步的
+handler: do_search
+});
 */
 /*
-  webot.waitRule('wait_timeout', function(info) {
-    if (new Date().getTime() - info.session.wait_begin > 5000) {
-      delete info.session.wait_begin;
-      return '你的操作超时了,请重新输入';
-    } else {
-      return '你在规定时限里面输入了: ' + info.text;
+   webot.waitRule('wait_timeout', function(info) {
+   if (new Date().getTime() - info.session.wait_begin > 5000) {
+   delete info.session.wait_begin;
+   return '你的操作超时了,请重新输入';
+   } else {
+   return '你在规定时限里面输入了: ' + info.text;
+   }
+   });
+
+// 超时处理
+webot.set('timeout', {
+description: '输入timeout, 等待5秒后回复,会提示超时',
+pattern: 'timeout',
+handler: function(info) {
+info.session.wait_begin = new Date().getTime();
+info.wait('wait_timeout');
+return '请等待5秒后回复';
+}
+});
+*/
+/**
+ * Wait rules as lists
+ *
+ * 实现类似电话客服的自动应答流程
+ *
+ */
+  webot.set('status', {
+    description: '回复status，查看本周meeting role预定情况',
+    // pattern 既可以是函数，也可以是 regexp 或 字符串(模糊匹配)
+    pattern: /^(status )\s*(.*)$/i,
+    // 回复handler也可以直接是字符串或数组，如果是数组则随机返回一个子元素
+    /*handler: 'career,{2}'*/
+    handler: function(info){
+      /*User.get(info.uid, function(err, user) {
+        if (err) return next(err);
+        info.user = user; // attach this user object to Info.
+        next();
+        });*/
+      var num=info.param[2]
+      var data=rf.readFileSync("roleassign.csv","utf-8");
+      var line=data.split("\n");
+      var flag=0
+      if(num==95){
+        data=rf.readFileSync("marason.csv","utf-8");
+        line=data.split("\n");
+        words=line.split(',')
+        result='第'+num+'次会议Role Assign情况：\n'
+        result+= 'TM: '+words[1]+' \n'
+        result+= 'GE: '+words[2]+' \n'
+        result+= 'Timer: '+words[3]+' \n'
+        result+= 'Ah-Counter: '+words[4]+' \n'
+        result+= 'Grammarian: '+words[5]+' \n'
+        result+= 'Speaker1: '+words[6]+' \n'
+        result+= 'Speaker2: '+words[7]+' \n'
+        result+= 'Speaker3: '+words[8]+' \n'
+        result+= 'Speaker4: '+words[9]+' \n'
+        result+= 'Speaker5: '+words[10]+' \n'
+        result+= 'Speaker6: '+words[11]+' \n'
+        result+= 'Speaker7: '+words[12]+' \n'
+        result+= 'Speaker8: '+words[13]+' \n'
+        result+= 'Evaluator1: '+words[14]+' \n'
+        result+= 'Evaluator2: '+words[15]+' \n'
+        result+= 'Evaluator3: '+words[16]+' \n'
+        result+= 'Evaluator4: '+words[17]+' \n'
+        result+= 'Evaluator5: '+words[18]+' \n'
+        result+= 'Evaluator6: '+words[19]+' \n'
+        result+= 'Evaluator7: '+words[20]+' \n'
+        result+= 'Evaluator8: '+words[21]+' \n'
+        return result
+
+      }
+      titles=line[0].split(",")
+      /*days=(new Date() - new Date(2015,3,10,0,0,0))/1000/60/60/24;*/
+      /*num=92+parseInt(days/7);*/
+      for (var i=0;i<line.length;i++){
+        oneline = line[i]
+        words = oneline.split(",")
+        var newnum = words[0]
+        if(newnum==num){
+          flag=1
+          result='第'+num+'次会议Role Assign情况：\n'
+          console.log(info.uid)
+          /*for(var j=1;j<titles.length;j++){*/
+          for(var j=1;j<13;j++){
+            result+=titles[j]+": "+words[j]+'\n'
+          }
+          /*result+= 'TM: '+words[1]+' \n'*/
+          /*result+= 'TTM: '+words[2]+' \n'*/
+          /*result+= 'GE: '+words[3]+' \n'*/
+          /*result+= 'Timer: '+words[4]+' \n'*/
+          /*result+= 'Ah-Counter: '+words[5]+' \n'*/
+          /*result+= 'Grammarian: '+words[6]+' \n'*/
+          /*result+= 'Speaker1: '+words[7]+' \n'*/
+          /*result+= 'Speaker2: '+words[8]+' \n'*/
+          /*result+= 'Speaker3: '+words[9]+' \n'*/
+          /*result+= 'Evaluator1: '+words[10]+' \n'*/
+          /*result+= 'Evaluator2: '+words[11]+' \n'*/
+          /*result+= 'Evaluator3: '+words[12]+' \n'*/
+        }
+
+      }
+      if(flag==1){
+        return result
+      }
+      return '不知所云'
     }
   });
 
-  // 超时处理
-  webot.set('timeout', {
-    description: '输入timeout, 等待5秒后回复,会提示超时',
-    pattern: 'timeout',
-    handler: function(info) {
-      info.session.wait_begin = new Date().getTime();
-      info.wait('wait_timeout');
-      return '请等待5秒后回复';
+  webot.set(/^(reg )\s*(.*)$/i, function(info) {
+    var data=rf.readFileSync("reg_unchecked.csv","utf-8");
+    var line=data.split("\n");
+    var flag=0
+    console.log(info.param[2])
+    /*console.log(info.param[1])*/
+    /*var id=info.param[2]*/
+    id=info.uid
+    for (var i=0;i<line.length;i++){
+      oneline = line[i]
+      words = oneline.split(",")
+      var newid = words[1]
+      if(newid==id){
+        flag=1
+        result='Hi '+words[0]+', you have already signed up'
+      }
+    }
+    if(flag==1){
+      return result
+    }
+    else{
+      newline=info.param[2]+','+info.uid+'\n'
+      line.push(newline)
+      lines=line.join('\n')
+      rf.writeFile('reg_unchecked.csv',lines)
+      return 'Hi '+info.param[2]+', 成功注册!'
+    }
+    return '不知所云'
+  });
+
+  webot.set(/^status/i, function(info) {
+    var data=rf.readFileSync("roleassign.csv","utf-8");
+    var line=data.split("\n");
+    var flag=0
+    titles=line[0].split(",")
+    days=(new Date() - new Date(2015,3,18,0,0,0))/1000/60/60/24;
+    num=92+parseInt(days/7);
+    if(num==95){
+      data=rf.readFileSync("marason.csv","utf-8");
+      line=data.split("\n");
+      words=line[0].split(',')
+      result='第'+num+'次会议Role Assign情况：\n'
+      result+= 'TM: '+words[1]+' \n'
+      result+= 'GE: '+words[2]+' \n'
+      result+= 'Timer: '+words[3]+' \n'
+      result+= 'Ah-Counter: '+words[4]+' \n'
+      result+= 'Grammarian: '+words[5]+' \n'
+      result+= 'Speaker1: '+words[6]+' \n'
+      result+= 'Speaker2: '+words[7]+' \n'
+      result+= 'Speaker3: '+words[8]+' \n'
+      result+= 'Speaker4: '+words[9]+' \n'
+      result+= 'Speaker5: '+words[10]+' \n'
+      result+= 'Speaker6: '+words[11]+' \n'
+      result+= 'Speaker7: '+words[12]+' \n'
+      result+= 'Speaker8: '+words[13]+' \n'
+      result+= 'Evaluator1: '+words[14]+' \n'
+      result+= 'Evaluator2: '+words[15]+' \n'
+      result+= 'Evaluator3: '+words[16]+' \n'
+      result+= 'Evaluator4: '+words[17]+' \n'
+      result+= 'Evaluator5: '+words[18]+' \n'
+      result+= 'Evaluator6: '+words[19]+' \n'
+      result+= 'Evaluator7: '+words[20]+' \n'
+      result+= 'Evaluator8: '+words[21]+' \n'
+      return result
+
+    }
+    for (var i=0;i<line.length;i++){
+      oneline = line[i]
+      words = oneline.split(",")
+      var newnum = words[0]
+      if(newnum==num){
+        flag=1
+        result='第'+num+'次会议Role Assign情况：\n'
+        /*for(var j=1;j<titles.length;j++){*/
+        for(var j=1;j<13;j++){
+          result+=titles[j]+": "+words[j]+'\n'
+        }
+        /*result+= 'TM: '+words[1]+' \n'*/
+        /*result+= 'TTM: '+words[2]+' \n'*/
+        /*result+= 'GE: '+words[3]+' \n'*/
+        /*result+= 'Timer: '+words[4]+' \n'*/
+        /*result+= 'Ah-Counter: '+words[5]+' \n'*/
+        /*result+= 'Grammarian: '+words[6]+' \n'*/
+        /*result+= 'Speaker1: '+words[7]+' \n'*/
+        /*result+= 'Speaker2: '+words[8]+' \n'*/
+        /*result+= 'Speaker3: '+words[9]+' \n'*/
+        /*result+= 'Evaluator1: '+words[10]+' \n'*/
+        /*result+= 'Evaluator2: '+words[11]+' \n'*/
+        /*result+= 'Evaluator3: '+words[12]+' \n'*/
+      }
+
+    }
+    if(flag==1){
+      return result
+    }
+    return '不知所云'
+  });
+
+  /*
+     rs='要预定role的话呢，首先回答我一个问题；\n'
+     var Rand = Math.random();
+     if(Rand<0.25){
+     info.wait('sophie');
+     return res+'最会养花的人是谁？'
+     }
+     if(Rand<0.50){
+     info.wait('monk');
+     return res+'男女通吃的是谁？'
+     }
+     if(Rand<0.75){
+     info.wait('jane');
+     return res+'有一位彪悍的护士叫？'
+     }
+     else{
+     info.wait('elena');
+     return res+'软件学院的特别爱放鸽子的？'
+     }
+     */
+  webot.set(/^(booking )\s*(.*)$/i, function(info) {
+    var data=rf.readFileSync("reg_checked.csv","utf-8");
+    var line=data.split("\n");
+    var flag=0
+    console.log(info.param[2])
+    require=info.text;
+    paras=require.split(' ')
+    /*console.log(info.param[1])*/
+    /*var id=info.param[2]*/
+    name=''
+    id=info.uid
+    console.log(info.uid)
+    for (var i=0;i<line.length;i++){
+      oneline = line[i]
+      words = oneline.split(",")
+      var newid = words[1]
+      if(newid==id){
+        flag=1
+        name=words[0]
+        /*result='Hi '+words[0]+', you have already signed up'*/
+      }
+    }
+    if(flag==1){
+      var newdata=rf.readFileSync("roleassign.csv","utf-8");
+      var line=newdata.split("\n");
+
+      if(paras.length>=3){
+        num=paras[1]
+        role=paras[2]
+        titleline=line[0]
+        titles=titleline.split(',')
+        for (var i=1;i<line.length;i++){
+          oneline = line[i]
+          words = oneline.split(",")
+          var newnum = words[0]
+          if(newnum==num){
+            for(var j=0;j<words.length;j++){
+              if(titles[j]==role){
+                if(words[j]==''){
+                  words[j]=name
+                  line[i]=words.join(',')
+                  lines=line.join('\n')
+                  rf.writeFile('roleassign.csv',lines)
+                  return '成功预定 第'+num+'次会议 '+role+'一枚！积极准备哟~'
+                }
+                else{
+                  return '这个坑被'+words[j]+'给占了，快去把他撵走'
+                }
+              }
+            }
+          }
+        }
+        return '不知所云'
+      }
+    }
+    else{
+      return '亲你不是我们的会员哟\n如果你是member，请回复reg Name来注册\n注册后才能预定角色\n还得通知Keven审核一下哈'
     }
   });
-*/
-  /**
-   * Wait rules as lists
-   *
-   * 实现类似电话客服的自动应答流程
-   *
-   */
-  webot.set(/^ok webot$/i, function(info) {
-    info.wait('list');
-    return '可用指令：\n' +
-           '1 - 查看程序信息\n' +
-           '2 - 进入名字选择';
+
+  webot.set(/^(contact )\s*(.*)$/i, function(info) {
+    var data=rf.readFileSync("reg_checked.csv","utf-8");
+    var line=data.split("\n");
+    var flag=0
+    require=info.text;
+    paras=require.split(' ')
+    /*console.log(info.param[1])*/
+    /*var id=info.param[2]*/
+    name=''
+    id=info.uid
+    console.log(info.uid)
+    for (var i=0;i<line.length;i++){
+      oneline = line[i]
+      words = oneline.split(",")
+      var newid = words[1]
+      if(newid==id){
+        flag=1
+        name=words[0]
+        /*result='Hi '+words[0]+', you have already signed up'*/
+      }
+    }
+    if(flag==1){
+      var newdata=rf.readFileSync("contact.csv","utf-8");
+      var line=newdata.split("\n");
+
+      if(paras.length>=2){
+        console.log(paras[1])
+        name=paras[1]
+        name=name.toLowerCase()
+        for (var i=1;i<line.length;i++){
+          oneline = line[i]
+          words = oneline.split(",")
+          /*newname = words[1]*/
+          newname=words[1].toLowerCase()
+          if(newname==name){
+            result='姓名:'+words[0]+' '+words[1]
+            result+='\n家乡:'+words[2]
+            result+='\n星座:'+words[3]
+            result+='\n电话:'+words[4]
+            result+='\n邮箱:'+words[5]
+            return result
+          }
+        }
+        return '不知所云'
+      }
+    }
+    else{
+      return '亲你不是我们的会员哟\n如果你是member，请回复reg Name来注册\n注册后才能预定角色\n还得通知Keven审核一下哈'
+    }
+  });
+
+  webot.waitRule('sophie', function(info) {
+    if(info.text=='sophie' || info.text=='Sophie'){
+      info.wait('number');
+      days=(new Date() - new Date(2015,3,10,0,0,0))/1000/60/60/24;
+      num=92+parseInt(days/7);
+      words='温馨提示：回复数字，下次meeting是第'+num+'次';
+      return '咳咳自己人，你要订哪次的？\n'+words;
+    }
+    res='不是我们的人！拖出去打PP！！'
+    return res;
+  });
+  webot.waitRule('monk', function(info) {
+    if(info.text=='monk' || info.text=='Monk'){
+      info.wait('number');
+      days=(new Date() - new Date(2015,3,10,0,0,0))/1000/60/60/24;
+      num=92+parseInt(days/7);
+      words='温馨提示：回复数字，下次meeting是第'+num+'次';
+      return '咳咳自己人，你要订哪次的？\n'+words;
+    }
+    res='不是我们的人！拖出去打PP！！'
+    return res;
+  });
+  webot.waitRule('jane', function(info) {
+    if(info.text=='jane' || info.text=='Jane'){
+      info.wait('number');
+      days=(new Date() - new Date(2015,3,10,0,0,0))/1000/60/60/24;
+      num=92+parseInt(days/7);
+      words='温馨提示：回复数字，下次meeting是第'+num+'次';
+      return '咳咳自己人，你要订哪次的？\n'+words;
+    }
+    res='不是我们的人！拖出去打PP！！'
+    return res;
+  });
+  webot.waitRule('elena', function(info) {
+    if(info.text=='elena' || info.text=='Elena'){
+      info.wait('number');
+      days=(new Date() - new Date(2015,3,10,0,0,0))/1000/60/60/24;
+      num=92+parseInt(days/7);
+      words='温馨提示：回复数字，下次meeting是第'+num+'次';
+      return '咳咳自己人，你要订哪次的？\n'+words;
+    }
+    res='不是我们的人！拖出去打PP！！'
+    return res;
+  });
+  webot.waitRule('number', function(info) {
+    num=info.text;
+    /*console.log(info.param[2])*/
+    var data=rf.readFileSync("roleassign.csv","utf-8");
+    var line=data.split("\n");
+    var flag=0
+    var name=info.param[2]
+    for (var i=0;i<line.length;i++){
+      oneline = line[i]
+      words = oneline.split(",")
+      var newnum = words[0]
+      if(newnum==num){
+        flag=1
+        result='第'+num+'次会议Role Assign情况：\n'
+        result+= 'TM: '+words[1]+' \n'
+        result+= 'TTM: '+words[2]+' \n'
+        result+= 'GE: '+words[3]+' \n'
+        result+= 'Timer: '+words[4]+' \n'
+        result+= 'Ah-Counter: '+words[5]+' \n'
+        result+= 'Grammarian: '+words[6]+' \n'
+        result+= 'Speaker1: '+words[7]+' \n'
+        result+= 'Speaker2: '+words[8]+' \n'
+        result+= 'Speaker3: '+words[9]+' \n'
+        result+= 'Evaluator1: '+words[10]+' \n'
+        result+= 'Evaluator2: '+words[11]+' \n'
+        result+= 'Evaluator3: '+words[12]+' \n'
+      }
+
+    }
+    if(flag==1){
+      info.wait('assign');
+      return result+'回复 次数 角色 姓名 预定\n如 92 Speaker1 Keven'
+    }
+
+    return '不知道你说的是哪一次T_T'
+  });
+
+  webot.waitRule('assign', function(info) {
+    /*var newrf=require('fs');*/
+    var newdata=rf.readFileSync("roleassign.csv","utf-8");
+    var line=newdata.split("\n");
+    var flag=0
+    var require=info.text;
+    var paras=require.split(' ')
+
+    if(paras.length==3){
+      num=paras[0];
+      role=paras[1];
+      name=paras[2];
+      titleline=line[0]
+      titles=titleline.split(',')
+      for (var i=1;i<line.length;i++){
+        oneline = line[i]
+        words = oneline.split(",")
+        var newnum = words[0]
+        if(newnum==num){
+          for(var j=0;j<words.length;j++){
+            if(titles[j]==role){
+              flag=1
+              if(words[j]==''){
+                words[j]=name
+                line[i]=words.join(',')
+                lines=line.join('\n')
+                rf.writeFile('roleassign.csv',lines)
+                return '成功预定 第'+num+'次会议 '+role+'一枚！积极准备哟~'
+              }
+              else{
+                return '这个坑被'+words[j]+'给占了，快去把他撵走'
+              }
+            }
+          }
+        }
+      }
+      return '不知所云'
+    }
+    return '不知所云'
+  });
+
+  webot.waitRule('test', {
+    'sophie': 'webot ' + package_info.version,
+    'Sophie': function(info) {
+      info.wait('list-2');
+      return '请选择人名:\n' +
+        '1 - Marry\n' +
+        '2 - Jane\n' +
+        '3 - 自定义'
+    }
   });
   webot.waitRule('list', {
     '1': 'webot ' + package_info.version,
     '2': function(info) {
       info.wait('list-2');
       return '请选择人名:\n' +
-             '1 - Marry\n' +
-             '2 - Jane\n' +
-             '3 - 自定义'
+        '1 - Marry\n' +
+        '2 - Jane\n' +
+        '3 - 自定义'
     }
   });
   webot.waitRule('list-2', {
@@ -370,48 +669,48 @@ module.exports = exports = function(webot){
   //支持location消息 此examples使用的是高德地图的API
   //http://restapi.amap.com/rgeocode/simple?resType=json&encode=utf-8&range=3000&roadnum=0&crossnum=0&poinum=0&retvalue=1&sid=7001&region=113.24%2C23.08
   /*
-  webot.set('check_location', {
-    description: '发送你的经纬度,我会查询你的位置',
-    pattern: function(info){
-      return info.is('location');
-    },
-    handler: function(info, next){
-      geo2loc(info.param, function(err, location, data) {
-        location = location || info.label;
-        next(null, location ? '你正在' + location : '我不知道你在什么地方。');
-      });
-    }
-  });
+     webot.set('check_location', {
+description: '发送你的经纬度,我会查询你的位置',
+pattern: function(info){
+return info.is('location');
+},
+handler: function(info, next){
+geo2loc(info.param, function(err, location, data) {
+location = location || info.label;
+next(null, location ? '你正在' + location : '我不知道你在什么地方。');
+});
+}
+});
 */
   //图片
   /*
-  webot.set('check_image', {
-    description: '发送图片,我将返回其hash值',
-    pattern: function(info){
-      return info.is('image');
-    },
-    handler: function(info, next){
-      verbose('image url: %s', info.param.picUrl);
-      try{
-        var shasum = crypto.createHash('md5');
+     webot.set('check_image', {
+description: '发送图片,我将返回其hash值',
+pattern: function(info){
+return info.is('image');
+},
+handler: function(info, next){
+verbose('image url: %s', info.param.picUrl);
+try{
+var shasum = crypto.createHash('md5');
 
-        var req = require('request')(info.param.picUrl);
+var req = require('request')(info.param.picUrl);
 
-        req.on('data', function(data) {
-          shasum.update(data);
-        });
-        req.on('end', function() {
-          return next(null, '你的图片hash: ' + shasum.digest('hex'));
-        });
-      }catch(e){
-        error('Failed hashing image: %s', e)
-        return '生成图片hash失败: ' + e;
-      }
-    }
-  });
+req.on('data', function(data) {
+shasum.update(data);
+});
+req.on('end', function() {
+return next(null, '你的图片hash: ' + shasum.digest('hex'));
+});
+}catch(e){
+error('Failed hashing image: %s', e)
+return '生成图片hash失败: ' + e;
+}
+}
+});
 */
   // 回复图文消息
-  webot.set('reply_news', {
+  webot.set('reply_letter', {
     description: '发送letter,查看最近的welcome letter',
     pattern: /^letter\s*(\d*)$/,
     handler: function(info){
@@ -425,7 +724,7 @@ module.exports = exports = function(webot){
     }
   });
 
-  webot.set('reply_news', {
+  webot.set('reply_minutes', {
     description: '发送minutes,查看最近的meeting minutes',
     pattern: /^minutes\s*(\d*)$/,
     handler: function(info){
@@ -439,18 +738,39 @@ module.exports = exports = function(webot){
     }
   });
 
+  webot.set('reply_minutes', {
+    description: '发送minutes,查看最近的meeting minutes',
+    pattern: /^rolebook\s*(\d*)$/,
+    handler: function(info){
+      var reply = [
+        {title: 'Toastmaster', description: '', pic: 'http://beihangtmc.qiniudn.com/tm.jpg', url: 'http://beihangtm.sinaapp.com/?page_id=115'},
+        {title: 'Table Topic Master', description: '', pic: 'http://beihangtmc.qiniudn.com/ttm.jpg', url: 'http://beihangtm.sinaapp.com/?page_id=131'},
+        {title: 'General Evaluator', description: '', pic: 'http://beihangtmc.qiniudn.com/ge.jpg', url: 'http://beihangtm.sinaapp.com/?page_id=172'},
+        {title: 'Timer', description: '', pic: 'http://beihangtmc.qiniudn.com/timer.jpg', url: 'http://beihangtm.sinaapp.com/?page_id=152'},
+        {title: 'Ah-Counter', description: '', pic: 'http://beihangtmc.qiniudn.com/ah.jpg', url: 'http://beihangtm.sinaapp.com/?page_id=157'},
+        {title: 'Grammarian', description: '', pic: 'http://beihangtmc.qiniudn.com/gra.jpg', url: 'http://beihangtm.sinaapp.com/?page_id=161'},
+        {title: 'Speech Evaluator', description: '', pic: 'http://beihangtmc.qiniudn.com/eva.jpg', url: 'http://beihangtm.sinaapp.com/?page_id=149'}
+      ];
+      // 发送 "news 1" 时只回复一条图文消息
+      return Number(info.param[1]) == 1 ? reply[0] : reply;
+    }
+  });
+
   // 可以指定图文消息的映射关系
   webot.config.mapping = function(item, index, info){
     //item.title = (index+1) + '> ' + item.title;
     return item;
   };
 
+  // 简单的纯文本对话，可以用单独的 yaml 文件来定义
+  require('js-yaml');
+  webot.dialog(__dirname + '/dialog.yaml');
   //所有消息都无法匹配时的fallback
   webot.set(/.*/, function(info){
-    // 利用 error log 收集听不懂的消息，以利于接下来完善规则
-    // 你也可以将这些 message 存入数据库
-    log('unhandled message: %s', info.text);
-    info.flag = true;
-    return '「' + info.text + '」?人家不懂诶。。。说点我能听懂的呢。要不还是给我发 help吧';
+  // 利用 error log 收集听不懂的消息，以利于接下来完善规则
+  // 你也可以将这些 message 存入数据库
+  log('unhandled message: %s', info.text);
+  info.flag = true;
+  return '「' + info.text + '」?人家不懂诶。。。说点我能听懂的呢。要不还是给我发 help吧';
   });
 };

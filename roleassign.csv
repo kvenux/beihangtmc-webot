@@ -1,4 +1,4 @@
-ROLE,TM,TTM,GE,Timer,Ah-Counter,Grammarian,Speaker1,Speaker2,Speaker3,Evaluator1,Evaluator2,Evaluator3
+﻿ROLE,TM,TTM,GE,Timer,Ah-Counter,Grammarian,Speaker1,Speaker2,Speaker3,Evaluator1,Evaluator2,Evaluator3
 84,Stan,Sophie,Haibo,MaunaLoa,Amy,Joshua,Jill,Haibo,,Grace,Keven,
 85,Joshua,Jane,Junyar,Elena,MaunaLoa,Grace,Isabelle,Lucia,Dale,Jill,Deron,Amanda
 86,Lucia,Joshua,Sophie,Vicky,Nancy,Isabelle,Jane,Doris,Monk,Jack,Keven,Dale
@@ -10,19 +10,19 @@ ROLE,TM,TTM,GE,Timer,Ah-Counter,Grammarian,Speaker1,Speaker2,Speaker3,Evaluator1
 92,Grace,Elena,Lucia,Winston,Bowen,Emily,Sophie,Isabelle,Keven,Monk,Jill,Doris
 93,Vicky,Jane,Sophie,Summers,Winston,Bowen,Jack,Grace,Jill,Keven,Doris,Lucia
 94,Joy,Jane,Sophie,Grace2,Summers,Winston,Jill,Lucia,Emily,Doris,Jack,MaunaLoa
-95,Jill,,,,,,Jane,Nancy,Winston ,,,
-96,,,,,,,MaunaLoa,Bowen,Jill,,,
-97,,,,,,,Jill,Vicky,Doris,,,
-98,,,,,,,Vicky,Lucia,Keven,,,
-99,,,,,,,,Vicky,,,,
+95,Jill,,,,,,Jane,Nancy,Winston,,,
+96,Bowen,Summers,Keven,Jill,Winston,Lucia,Nancy,MaunaLoa,Grace,Deron,Jane,Sophie
+97,Keven,Isabelle,Deron,MaunaLoa,Vicky,Nancy,Grace2,,Doris,Winston,Lucia,
+98,Bowen,Dale,Junyar,MaunaLoa,Elena,Vance,Summers,,Doris,Joy,,Sophie
+99,Sophie,Joy,Grace,Rita,Grace2,Winston ,Doris,Vicky,Vance,Junyar,Jack,Bowen
 100,,,,,,,,,,,,
-101,,,,,,,,,,,,
-102,,,,,,,,,,,,
-103,,,,,,,,,,,,
-104,,,,,,,,,,,,
-105,,,,,,,,,,,,
-106,,,,,,,,,,,,
-107,,,,,,,,,,,,
-108,,,,,,,,,,,,
+101,Vicky,Grace2,Sophie,Nancy,Winston ,Summers,Keven,Bowen,,Doris,Isabelle,
+102,Isabelle,Jane,Joshua,Maggie,Elena,Rita,Jack,Grace2,,Keven,Sophie,
+103,Elena,Junyar,Doris,Keven,Winston,Grace2,Emily,Nancy,,Bowen,Jack,
+104,Isabelle,Winston,,Django,Rita,Bowen,Vicky,Junyar,,Sophie,Doris,
+105,MaunaLoa,Isabelle,Keven,Sophie,Maggie,Vicky,,Jill,Bowen,,Doris,Grace2
+106,Winston ,Bowen,Jill,Grace2,,Jane,Vicky,Rita,,,,
+107,Jill,Vicky,,,,,,,,,,
+108,,,,MaunaLoa,,,Vicky,,,,,
 109,,,,,,,,,,,,
 110,,,,,,,,,,,,

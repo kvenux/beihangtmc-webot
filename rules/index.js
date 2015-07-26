@@ -11,12 +11,26 @@ var search = require('../lib/support').search;
 var geo2loc = require('../lib/support').geo2loc;
 
 var package_info = require('../package.json');
+var Segment = require('segment');
 
+var defaultOptions = {
+  url: 'http://api.pullword.com/post.php', /* api url */
+  threshold: 0.5, /* must be [0-1] */
+  debug: 0, /* debug=1, debug mode in on(show all probabilities of each word) */
+  array: 0 /* array=0, return raw-string */
+
+};
+
+
+var api = require('pullword')(defaultOptions);
 /**
  * 初始化路由规则
  */
 module.exports = exports = function(webot){
+  var global_flag=0
+  var global_res=''
   var reg_help = /^(help|\?)$/i
+  var last_word=''
   webot.set({
     // name 和 description 都不是必须的
     name: 'hello help',
@@ -31,9 +45,20 @@ module.exports = exports = function(webot){
         pic: 'http://kvenux.qiniudn.com/tags.png',
         url: 'http://beihangtm.sinaapp.com/',
         description: [
-          '你可以试试以下指令:',
-          '重看本指令请回复help或问号',
-          '更多指令请回复more',
+          '回复以下关键字，人家就会帮你哟~',
+          '[map] 查看北航Toastmaster会议室地图',
+          '[who] 北航Toastmaster基本介绍',
+          '[rolebook] 查看各类role的入门指导',
+          '[visit] 拜访各个俱乐部的地址',
+          '[officer] 查看各officer职位介绍',
+          '[status] 查看本周会议角色预定情况',
+          '[status 106] 查看第106次会议角色预定情况,106表示会议次数',
+          '[career Name] 查看Member生涯数据',
+          '[booking 92 Timer] 会员预定会议角色，92表示会议次数，Timer表示角色名',
+          '[cancel 92 Timer] 会员取消会议角色',
+          '[contact Name] 查看Member通讯录',
+          '[rolehis Name] 查看会员担任过所有角色的日期',
+          '[reg Name] 新会员在公众平台上注册',
           '点击「查看全文」将跳转到我们的博客哟'
         ].join('\n')
       };
@@ -43,17 +68,17 @@ module.exports = exports = function(webot){
   });
 
   // 更简单地设置一条规则
-  webot.set(/^more$/i, function(info){
-    var reply = _.chain(webot.gets()).filter(function(rule){
-      return rule.description;
-    }).map(function(rule){
-      //console.log(rule.name)
-      return '> ' + rule.description;
-    }).join('\n').value();
-
-    return ['我的主人还没教我太多东西,你可以考虑帮我加下.\n可用的指令:\n'+ reply,
-      '没有更多啦！当前可用指令：\n' + reply];
-  });
+  /*webot.set(/^more$/i, function(info){*/
+  /*var reply = _.chain(webot.gets()).filter(function(rule){*/
+  /*return rule.description;*/
+  /*}).map(function(rule){*/
+  /*//console.log(rule.name)*/
+  /*return '> ' + rule.description;*/
+  /*}).join('\n').value();*/
+  /**/
+  /*return ['我的主人还没教我太多东西,你可以考虑帮我加下.\n可用的指令:\n'+ reply,*/
+  /*'没有更多啦！当前可用指令：\n' + reply];*/
+  /*});*/
 
   webot.set('career', {
     description: '回复career Name，查看你担任过的角色和完成的演讲',
@@ -152,7 +177,7 @@ module.exports = exports = function(webot){
       return 'You are not member, ' + info.param[2]
     }
   });
-
+  /*
   webot.set('who_are_you', {
     description: '想知道我是谁吗? 发送: who?',
     // pattern 既可以是函数，也可以是 regexp 或 字符串(模糊匹配)
@@ -160,6 +185,7 @@ module.exports = exports = function(webot){
     // 回复handler也可以直接是字符串或数组，如果是数组则随机返回一个子元素
     handler: ['我是北航头马的机器人，叫人家小北北┑(￣▽ ￣)┍', '小玫瑰2号']
   });
+  */
 
 
   /*
@@ -217,7 +243,7 @@ return '请等待5秒后回复';
       if(num==95){
         data=rf.readFileSync("marason.csv","utf-8");
         line=data.split("\n");
-        words=line.split(',')
+        words=line[0].split(',')
         result='第'+num+'次会议Role Assign情况：\n'
         result+= 'TM: '+words[1]+' \n'
         result+= 'GE: '+words[2]+' \n'
@@ -231,17 +257,14 @@ return '请等待5秒后回复';
         result+= 'Speaker5: '+words[10]+' \n'
         result+= 'Speaker6: '+words[11]+' \n'
         result+= 'Speaker7: '+words[12]+' \n'
-        result+= 'Speaker8: '+words[13]+' \n'
-        result+= 'Evaluator1: '+words[14]+' \n'
-        result+= 'Evaluator2: '+words[15]+' \n'
-        result+= 'Evaluator3: '+words[16]+' \n'
-        result+= 'Evaluator4: '+words[17]+' \n'
-        result+= 'Evaluator5: '+words[18]+' \n'
-        result+= 'Evaluator6: '+words[19]+' \n'
-        result+= 'Evaluator7: '+words[20]+' \n'
-        result+= 'Evaluator8: '+words[21]+' \n'
+        result+= 'Evaluator1: '+words[13]+' \n'
+        result+= 'Evaluator2: '+words[14]+' \n'
+        result+= 'Evaluator3: '+words[15]+' \n'
+        result+= 'Evaluator4: '+words[16]+' \n'
+        result+= 'Evaluator5: '+words[17]+' \n'
+        result+= 'Evaluator6: '+words[18]+' \n'
+        result+= 'Evaluator7: '+words[19]+' \n'
         return result
-
       }
       titles=line[0].split(",")
       /*days=(new Date() - new Date(2015,3,10,0,0,0))/1000/60/60/24;*/
@@ -288,10 +311,13 @@ return '请等待5秒后回复';
     /*console.log(info.param[1])*/
     /*var id=info.param[2]*/
     id=info.uid
-    for (var i=0;i<line.length;i++){
+    for (var i=0;i<line.length-1;i++){
       oneline = line[i]
       words = oneline.split(",")
       var newid = words[1]
+      if(id.length == newid.length - 1){
+        newid=newid.substring(0, newid.length-1)
+      }
       if(newid==id){
         flag=1
         result='Hi '+words[0]+', you have already signed up'
@@ -305,7 +331,7 @@ return '请等待5秒后回复';
       line.push(newline)
       lines=line.join('\n')
       rf.writeFile('reg_unchecked.csv',lines)
-      return 'Hi '+info.param[2]+', 成功注册!'
+      return 'Hi '+info.param[2]+', 成功注册!请通知Mauna Loa进行后台审核'
     }
     return '不知所云'
   });
@@ -334,15 +360,13 @@ return '请等待5秒后回复';
       result+= 'Speaker5: '+words[10]+' \n'
       result+= 'Speaker6: '+words[11]+' \n'
       result+= 'Speaker7: '+words[12]+' \n'
-      result+= 'Speaker8: '+words[13]+' \n'
-      result+= 'Evaluator1: '+words[14]+' \n'
-      result+= 'Evaluator2: '+words[15]+' \n'
-      result+= 'Evaluator3: '+words[16]+' \n'
-      result+= 'Evaluator4: '+words[17]+' \n'
-      result+= 'Evaluator5: '+words[18]+' \n'
-      result+= 'Evaluator6: '+words[19]+' \n'
-      result+= 'Evaluator7: '+words[20]+' \n'
-      result+= 'Evaluator8: '+words[21]+' \n'
+      result+= 'Evaluator1: '+words[13]+' \n'
+      result+= 'Evaluator2: '+words[14]+' \n'
+      result+= 'Evaluator3: '+words[15]+' \n'
+      result+= 'Evaluator4: '+words[16]+' \n'
+      result+= 'Evaluator5: '+words[17]+' \n'
+      result+= 'Evaluator6: '+words[18]+' \n'
+      result+= 'Evaluator7: '+words[19]+' \n'
       return result
 
     }
@@ -410,14 +434,19 @@ return '请等待5秒后回复';
     name=''
     id=info.uid
     console.log(info.uid)
-    for (var i=0;i<line.length;i++){
+    for (var i=0;i<line.length-1;i++){
       oneline = line[i]
       words = oneline.split(",")
       var newid = words[1]
+      /*console.log(newid)*/
+      /*console.log(id.length)*/
+      /*console.log(newid.length)*/
+      if(id.length == newid.length - 1){
+        newid=newid.substring(0, newid.length-1)
+      }
       if(newid==id){
         flag=1
         name=words[0]
-        /*result='Hi '+words[0]+', you have already signed up'*/
       }
     }
     if(flag==1){
@@ -454,6 +483,74 @@ return '请等待5秒后回复';
       }
     }
     else{
+      return '亲你不是我们的会员哟\n如果你是member，请回复reg Name来注册\n注册后才能预定角色\n还得通知Mauna Loa审核一下哈'
+    }
+  });
+
+  webot.set(/^(cancel )\s*(.*)$/i, function(info) {
+    var data=rf.readFileSync("reg_checked.csv","utf-8");
+    var line=data.split("\n");
+    var flag=0
+    console.log(info.param[2])
+    require=info.text;
+    paras=require.split(' ')
+    /*console.log(info.param[1])*/
+    /*var id=info.param[2]*/
+    name=''
+    id=info.uid
+    console.log(info.uid)
+    for (var i=0;i<line.length-1;i++){
+      oneline = line[i]
+      words = oneline.split(",")
+      var newid = words[1]
+      console.log(newid)
+      console.log(id)
+      if(id.length == newid.length - 1){
+        newid=newid.substring(0, newid.length-1)
+      }
+      if(newid==id){
+        flag=1
+        name=words[0]
+        /*result='Hi '+words[0]+', you have already signed up'*/
+      }
+    }
+    if(flag==1){
+      var newdata=rf.readFileSync("roleassign.csv","utf-8");
+      var line=newdata.split("\n");
+
+      if(paras.length>=3){
+        num=paras[1]
+        role=paras[2]
+        titleline=line[0]
+        titles=titleline.split(',')
+        for (var i=1;i<line.length;i++){
+          oneline = line[i]
+          words = oneline.split(",")
+          var newnum = words[0]
+          if(newnum==num){
+            for(var j=0;j<words.length;j++){
+              if(titles[j]==role){
+                if(words[j]==name){
+                  words[j]=''
+                  line[i]=words.join(',')
+                  lines=line.join('\n')
+                  rf.writeFile('roleassign.csv',lines)
+                  return '第'+num+'次会议 '+role+'取消了。。。\n怎嘛不做啦？╭(╯^╰)╮一脸怨念'
+                }
+                else if(words[j]==''){
+                  return '奏凯！这坑都没人做！'
+                }
+                else{
+                  return '奏凯！这个坑是'+words[j]+'的，你取消个毛线'
+                }
+              }
+            }
+          }
+        }
+        return '不知所云'
+      }
+    }
+    else{
       return '亲你不是我们的会员哟\n如果你是member，请回复reg Name来注册\n注册后才能预定角色\n还得通知Keven审核一下哈'
     }
   });
@@ -464,15 +561,16 @@ return '请等待5秒后回复';
     var flag=0
     require=info.text;
     paras=require.split(' ')
-    /*console.log(info.param[1])*/
-    /*var id=info.param[2]*/
     name=''
     id=info.uid
     console.log(info.uid)
-    for (var i=0;i<line.length;i++){
+    for (var i=0;i<line.length-1;i++){
       oneline = line[i]
       words = oneline.split(",")
       var newid = words[1]
+      if(id.length == newid.length - 1){
+        newid=newid.substring(0, newid.length-1)
+      }
       if(newid==id){
         flag=1
         name=words[0]
@@ -507,6 +605,53 @@ return '请等待5秒后回复';
     else{
       return '亲你不是我们的会员哟\n如果你是member，请回复reg Name来注册\n注册后才能预定角色\n还得通知Keven审核一下哈'
     }
+  });
+
+  webot.set(/^vote/i, function(info) {
+    var data=rf.readFileSync("theme.csv","utf-8");
+    var line=data.split("\n");
+    days=(new Date() - new Date(2015,3,18,0,0,0))/1000/60/60/24;
+    num=92+parseInt(days/7);
+    res = '欢迎参与第' + num +'次会议主题讨论\n'
+    res += '本次投票的主要议题有:\n'
+    for (var i=0;i<line.length-1;i++){
+      oneline = line[i]
+      words = oneline.split(",")
+      num = i+1
+      res += num+ '.' + words[0] +' '+ words[1]+'票\n'
+    }
+    res += '直接回复数字参与投票\n'
+    info.wait('vote')
+    return res
+  });
+
+  webot.waitRule('vote', function(info) {
+    var data=rf.readFileSync("theme.csv","utf-8");
+    var line=data.split("\n");
+    num = parseInt(info.text)
+    console.log(num)
+    for (var i=0;i<line.length;i++){
+      oneline = line[i]
+      words = oneline.split(",")
+      number = i+1
+      if(num == number){
+        words[1] = parseInt(words[1])+1
+        line[i]=words.join(',')
+        lines=line.join('\n')
+        rf.writeFile('theme.csv',lines)
+        break
+      }
+    }
+    line=lines.split('\n')
+    res = '投票成功：\n'
+    for (var i=0;i<line.length-1;i++){
+      oneline = line[i]
+      words = oneline.split(",")
+      number = i+1
+      res += number+ '.' + words[0] +' '+ words[1]+'票\n'
+    }
+    res += '谢谢支持！'
+    return res;
   });
 
   webot.waitRule('sophie', function(info) {
@@ -724,6 +869,62 @@ return '生成图片hash失败: ' + e;
     }
   });
 
+  webot.set('reply_map', {
+    description: '发送map,查看最近的meeting minutes',
+    pattern: /^map\s*(\d*)$/,
+    handler: function(info){
+      var reply = [
+        {title: 'How to get to Beihang TMC meeting place', description: '', pic: 'http://beihangtmc.qiniudn.com/map.jpg', url: 'http://mp.weixin.qq.com/s?__biz=MzA3NDM0NzUyOQ==&mid=206313644&idx=2&sn=89536d2ce3c6e8398eebaa327c2b5c63#rd'},
+      ];
+      // 发送 "news 1" 时只回复一条图文消息
+      return Number(info.param[1]) == 1 ? reply[0] : reply;
+    }
+  });
+  webot.set('reply_who', {
+    description: '发送map,查看最近的meeting minutes',
+    pattern: /^who\s*(\d*)$/,
+    handler: function(info){
+      var reply = [
+        {title: 'Who We Are', description: '', pic: 'http://beihangtmc.qiniudn.com/DSC05116.JPG', url: 'http://mp.weixin.qq.com/s?__biz=MzA3NDM0NzUyOQ==&mid=206313644&idx=3&sn=13d91c4d6811917454f45448e8cc074d#rd'},
+      ];
+      // 发送 "news 1" 时只回复一条图文消息
+      return Number(info.param[1]) == 1 ? reply[0] : reply;
+    }
+  });
+  webot.set('reply_visit', {
+    description: '发送map,查看最近的meeting minutes',
+    pattern: /^visit\s*(\d*)$/,
+    handler: function(info){
+      var reply = [
+        {title: 'Information for Toastmasters Clubs in Beijing', description: '', pic: 'http://beihangtmc.qiniudn.com/visit.jpg', url: 'http://mp.weixin.qq.com/s?__biz=MzA3NDM0NzUyOQ==&mid=206665464&idx=1&sn=84879ae7e6ec718f70f943fd319f56d6#rd'},
+      ];
+      // 发送 "news 1" 时只回复一条图文消息
+      console.log(reply);
+      var newrep = {
+        type: "image",
+        content: {
+          mediaId : 'http://beihangtmc.qiniudn.com/visit.jpg'
+        }
+      };
+
+      /*return Number(info.param[1]) == 1 ? reply[0] : reply;*/
+      /*return newrep;*/
+      return reply;
+    }
+  });
+
+  webot.set('reply_officer', {
+    description: '发送map,查看最近的meeting minutes',
+    pattern: /^officer\s*(\d*)$/,
+    handler: function(info){
+      var reply = [
+        {title: 'Toastmasters Club各职位介绍', description: '', pic: 'http://beihangtmc.qiniudn.com/officer.jpg', url: 'http://mp.weixin.qq.com/s?__biz=MzA3NDM0NzUyOQ==&mid=206901402&idx=1&sn=6ddbfacaecd122658326212174c5158c#rd'},
+      ];
+      // 发送 "news 1" 时只回复一条图文消息
+      return Number(info.param[1]) == 1 ? reply[0] : reply;
+    }
+  });
+
   webot.set('reply_minutes', {
     description: '发送minutes,查看最近的meeting minutes',
     pattern: /^minutes\s*(\d*)$/,
@@ -738,8 +939,8 @@ return '生成图片hash失败: ' + e;
     }
   });
 
-  webot.set('reply_minutes', {
-    description: '发送minutes,查看最近的meeting minutes',
+  webot.set('reply_rolebook', {
+    description: '发送rolebook,查看角色担任指南',
     pattern: /^rolebook\s*(\d*)$/,
     handler: function(info){
       var reply = [
@@ -766,11 +967,50 @@ return '生成图片hash失败: ' + e;
   require('js-yaml');
   webot.dialog(__dirname + '/dialog.yaml');
   //所有消息都无法匹配时的fallback
+
   webot.set(/.*/, function(info){
   // 利用 error log 收集听不懂的消息，以利于接下来完善规则
   // 你也可以将这些 message 存入数据库
   log('unhandled message: %s', info.text);
+
+  /*
   info.flag = true;
-  return '「' + info.text + '」?人家不懂诶。。。说点我能听懂的呢。要不还是给我发 help吧';
+  var segment = new Segment();
+  segment.useDefault();
+  //
+  console.log(segment.doSegment(info.text));
+  res = segment.doSegment(info.text)
+  word=res[0].w
+  newdata=rf.readFileSync("material.csv","utf-8");
+  line=newdata.split("\n");
+  flag=0
+  for (var i=1;i<line.length;i++){
+    oneline=line[i]
+    words = oneline.split(",")
+    if(words[0]==word){
+      flag=1
+      return words[1]
+    }
+  }
+  if(flag==0){
+    last_word=word
+    info.wait('savewords');
+    return word+' 是什么意思？回复一下教教我呗。我会记住的'
+  }
+
+  return res[0].w
+  */
+
+  return '「' + info.text + '」?人家不懂诶。。。还是发 help吧';
+  });
+
+  webot.waitRule('savewords', function(info) {
+    newdata=rf.readFileSync("material.csv","utf-8");
+    line=newdata.split("\n");
+    line[line.length]=last_word+','+info.text
+    lines=line.join('\n')
+    rf.writeFile('material.csv',lines)
+
+    return '我记住了，'+last_word+' 是 '+info.text
   });
 };

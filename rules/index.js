@@ -48,17 +48,17 @@ module.exports = exports = function(webot){
           '回复以下关键字，人家就会帮你哟~',
           '[map] 查看北航Toastmaster会议室地图',
           '[who] 北航Toastmaster基本介绍',
-          '[rolebook] 查看各类role的入门指导',
+          /*'[rolebook] 查看各类role的入门指导',*/
           '[visit] 拜访各个俱乐部的地址',
           '[officer] 查看各officer职位介绍',
-          '[status] 查看本周会议角色预定情况',
-          '[status 106] 查看第106次会议角色预定情况,106表示会议次数',
+          /*'[status] 查看本周会议角色预定情况',*/
+          /*'[status 106] 查看第106次会议角色预定情况,106表示会议次数',*/
           '[career Name] 查看Member生涯数据',
-          '[booking 92 Timer] 会员预定会议角色，92表示会议次数，Timer表示角色名',
-          '[cancel 92 Timer] 会员取消会议角色',
+          /*'[booking 92 Timer] 会员预定会议角色，92表示会议次数，Timer表示角色名',*/
+          /*'[cancel 92 Timer] 会员取消会议角色',*/
           '[contact Name] 查看Member通讯录',
           '[rolehis Name] 查看会员担任过所有角色的日期',
-          '[reg Name] 新会员在公众平台上注册',
+          /*'[reg Name] 新会员在公众平台上注册',*/
           '点击「查看全文」将跳转到我们的博客哟'
         ].join('\n')
       };

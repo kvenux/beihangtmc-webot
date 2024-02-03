@@ -6,7 +6,7 @@
     "debug": "~0.7.2",
     "express": "~3.0",
     "js-yaml": "~2.0.3",
-    "request": "~2.12",
+    "request": "~2.88.2",
     "segment": "0.0.6",
     "underscore": "~1.4",
     "weixin-robot": "~0.5.0"
